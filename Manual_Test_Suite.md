@@ -706,7 +706,7 @@ Login page is shown with the error "Epic sadface: You can only access '/inventor
 | Area | Security |
 | Type | Negative |
 | Priority | P2 |
-| Automate? | Yes – same rule as TC19 through a different path |
+| Automate? | Yes – same rule as TC20 through a different path |
 | Status | Manual only (automation backlog) |
 
 **Pre-conditions**

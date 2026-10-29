@@ -22,7 +22,7 @@ Each row below is one place the assistant was used, in the order it happened.
 ## Issues the AI raised that I still have to decide
 
 - TC02 test data says `locked_user`. The real SauceDemo username is `locked_out_user`, which is what config uses.
-- TC21's "why" column says "same rule as TC19", but it probably should say TC20.
+- TC21's "why" column said "same rule as TC19", but it should say TC20. Fixed: I corrected it in my A1 sheet and the repo copies were updated to match.
 
 ## My own review
 

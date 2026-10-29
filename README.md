@@ -9,6 +9,7 @@ Selenium 4 + Java + TestNG suite for https://www.saucedemo.com, built with the P
 | [`Manual_Test_Suite.md`](Manual_Test_Suite.md) / `Manual_Test_Suite.csv` | A1: the 26 manual test cases |
 | `src/test/java/` | A2: page objects, tests and utilities |
 | `testng.xml`, `pom.xml`, `src/test/resources/config.properties` | Suite, build and configuration |
+| [`ANSWERS.md`](ANSWERS.md) | Section B answers: B1 AI test review, B2 AI feature evaluation, B3 defect report, B4 message to the PM |
 | [`AI_USAGE.md`](AI_USAGE.md) | Where an AI coding assistant was used, and how its output was checked |
 
 ## Setup
@@ -17,7 +18,7 @@ Requirements: **JDK 17+**, **Maven 3.9+**, and Google Chrome (Firefox and Edge a
 No driver download is needed: Selenium Manager fetches the matching driver automatically.
 
 ```bash
-git clone <repo-url> harvee-assessment && cd harvee-assessment
+git clone https://github.com/Sumedh-14/Harvee-Assessment.git && cd Harvee-Assessment
 mvn -q test-compile        # downloads dependencies and compiles
 ```
 
@@ -53,6 +54,10 @@ mvn test -Dtest='CheckoutTest#TC17*'       # a single test on its own
 | **`target/report/index.html`**               | **The report.** One self-contained HTML file: summary, per-test status by A1 ID, data rows, errors, and failure screenshots embedded. Open it with `open target/report/index.html`. |
 | `target/surefire-reports/TEST-TestSuite.xml` | JUnit XML for CI tools |
 | `target/screenshots/*.png`                   | Screenshot of the browser for every failure (also embedded in the report) |
+
+**Latest report online:** https://sumedh-14.github.io/Harvee-Assessment/
+
+The suite can be run on GitHub Actions by hand: open the **Actions** tab, choose **Tests**, then **Run workflow** (`.github/workflows/tests.yml`). It runs in headless Chrome and publishes the report to GitHub Pages, including runs where tests fail. The report, JUnit XML and screenshots are also attached to each run as the `test-report` artifact.
 
 TestNG's built-in HTML reports are switched off in `pom.xml` (`usedefaultlisteners=false`). They depend on a retired Google script and render badly.
 
