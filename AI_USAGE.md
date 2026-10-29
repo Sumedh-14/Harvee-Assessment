@@ -1,0 +1,27 @@
+# AI Usage
+
+**Tool:** Claude Code (Anthropic, model Claude Opus 5.5), run in the terminal against this project folder.
+
+**Not AI-generated:** the 26 A1 manual test cases (`Manual_Test_Suite.csv`) were written by me before the AI was involved,
+and so were the first versions of `base/BaseClass.java` and the empty `tests/loginTest.java`.
+
+Each row below is one place the assistant was used, in the order it happened.
+
+| # | What I asked for | What the AI produced | How the output was checked | What I changed / corrected |
+|---|------------------|----------------------|----------------------------|----------------------------|
+| 1 | Page Object classes under `src/test/java/pages/` with locators for every component on Login, Products, Cart, Checkout: Your Information and Checkout: Overview | `pom.xml` (Selenium 4.27, TestNG 7.10), `BasePage` (shared header, menu, footer) and the five page classes. Locators were taken from the live DOM with a throw-away headless-Chrome script, not guessed. | Compiled. A script looked up **every** locator, including the per-product ones for all 6 products, on its live page: 169 found, 0 missing. | Removed the AI's explanatory comments from the page classes. |
+| 2 | Review of the `BaseClass` and `loginTest` I had written | It found that `BaseClass` did not compile (`com.beust.jcommander.@Parameter` used instead of TestNG's `@Parameters`), that a `URL` parameter cannot receive a testng.xml string, that the static `new ChromeDriver()` ran at class load, and that the browser was never closed. | Ran `mvn test` after the fix: build succeeded. | I approved the fix. It replaced the annotation, took a `String` URL, moved driver creation into the setup method, added `@AfterSuite` quit and `testng.xml`, and renamed the class to `LoginTest`. |
+| 3 | Implement the A2 brief: 8+ tests, POM, no sleeps, config, independent tests, screenshot on failure, report, README | `ConfigReader` (properties file overridable by `-D` and env vars), `DriverFactory`, `ScreenshotUtil`, wait-based actions in the page objects, `CheckoutCompletePage`, a per-test browser in `BaseClass` (ThreadLocal, parallel-safe), the tests, `testng.xml` and `README.md` | Full suite run repeatedly, headless and headed, in parallel (4 threads), one test on its own (`-Dtest=...`), and in random order. Problems found during these runs and fixed: (a) both sort tests timed out reading a hidden `<span>`, so the code now reads the selected `<option>`; (b) about 1 in 3 early runs had a test fail on a **blank first page load**. Diagnostic runs and 16 parallel fresh-browser loads could not reproduce it, so it was treated as a site or network blip, and `LoginPage.open()` now reloads once. (c) Chrome's breached-password popup for `secret_sauce` is disabled in `DriverFactory`. | The AI first used its own placeholder test IDs and scenarios, because I had not shared A1 yet. See row 4. |
+| 4 | Use **my A1 cases**, not invented ones, for the automated tests | The tests were re-mapped and rewritten to follow A1 steps, data and expected results: TC01, TC02, TC07, TC08, TC10, TC15, TC17, TC20 | Compared against the A1 sheet. Examples: TC10 now removes the item **on the products page** and checks button text, quantity and $9.99, where the earlier draft removed it in the cart, which is TC11. TC15 now has A1's 4th row (all fields empty) and A1's data `Test / User / 560001`. Suite re-run 3 times: 11 of 11 passed each time. | Supplied the A1 CSV and required the selection to come from it. |
+| 5 | The TestNG `index.html` report rendered without styling | `utils/HtmlReportListener`: one self-contained HTML report (inline CSS, failure screenshots embedded as base64), registered in `pom.xml` and `testng.xml` | Forced a failure with `-DstandardUser=wrong_user` and viewed the rendered report. The failing test, its error and the embedded screenshot showed correctly. Two problems were found and fixed: Selenium's long driver footer cluttered the error message, and `-Dtest=` runs skipped `testng.xml`, so they produced no report until the listener was also registered in `pom.xml`. | |
+| 6 | Put my A1 test cases into `Manual_Test_Suite.md` | A script that converts the CSV into Markdown (summary table plus one section per case, with automation status) | A script compared every word of every CSV field against the Markdown: nothing missing. Only obvious typos were changed (e.g. "credentilal"). | |
+| 7 | This file, `.gitignore`, the README repository section, and setting up the Git repository | These files and the initial commit | Read through before committing. | |
+
+## Issues the AI raised that I still have to decide
+
+- TC02 test data says `locked_user`. The real SauceDemo username is `locked_out_user`, which is what config uses.
+- TC21's "why" column says "same rule as TC19", but it probably should say TC20.
+
+## My own review
+
+<!-- Fill in before submitting: what you read or re-ran yourself, anything you disagreed with or rewrote. -->

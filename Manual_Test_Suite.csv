@@ -1,0 +1,143 @@
+ID,Area,Type,Title,Pre-conditions,Steps,Test data,Expected result,Priority (P1–P3),Automate? (Yes / No) and why
+TC01,Login,Positive,Standard user logs in,"1. Launch ""https://www.saucedemo.com/""","1. Enter valid ""User name""
+2. Enter valid ""Password""
+3. Click ""Login""",standard_user / secret_sauce,The user should be able to login successfully and the products page should display,P1,Yes – smoke test on every build
+TC02,Login,Negative,Locked-out user cannot log in,"1. Launch ""https://www.saucedemo.com/""","1. Enter the locked-out user name 
+2. Enter valid ""Password""
+3. Click ""Login""",locked_user / secret_sauce,"User stays on the login page and the error ""Epic sadface: Sorry, this user has been locked out."" should be thrown",P1,Yes
+TC03,Login,Negative,Invalid User Name or wrong password is rejected,"1. Launch ""https://www.saucedemo.com/""","1. Enter username
+2. Enter password
+3. Click ""Login""","a. abc_test
+b. standard_user / wrong_pass",The user should not be able to login and an error message should be thrown,P1,Yes – smoke test on every build
+TC04,Login,Negative,Empty username or password shows a required-field error,"1. Launch ""https://www.saucedemo.com/""","1. Leave the field empty as per the data row
+2. Click ""Login""","a) (empty) / secret_sauce
+b) standard_user / (empty)
+c) (empty) / (empty)","a) ""Epic sadface: Username is required""
+b) ""Epic sadface: Password is required""
+c) ""Epic sadface: Username is required""
+User is not logged in for any row",P2,Yes – smoke test on every build
+TC05,Product List,Positive,Products page lists all items with complete details,"1. Launch ""https://www.saucedemo.com/""
+2. Login with valid user credentilal",1. Observe the product list,"standard_user 
+Valid password","User should be launched to product list screen and all the products should display along with the respective images, names, description, price in $X.XX format and an ""Add to cart"" button; no cart badge should display",P2,Yes – catches broken or missing data
+TC06,Sorting,Positive,Sort by name A to Z and Z to A,"1. Launch ""https://www.saucedemo.com/""
+2. Login with valid user credentilal","1. Note the default order
+2. Select ""Name (Z to A)""
+3. Select ""Name (A to Z)""",Sort options,"Default order should be A to Z. 
+After step 2 the whole list should be in reverse alphabetical order; 
+After step 3 the whole list should be in alphabetical order",P2,"Yes – assertion on the whole list, independent of catalogue content"
+TC07,Sorting,Positive,Sort by price low to high,"1. Launch ""https://www.saucedemo.com/""
+2. Login with valid user credentilal","1. Select ""Price (low to high)""
+2. Read all 6 prices from top to bottom","Sort option ""Price (low to high)""","Every price is less than or equal to the one after it (currently 7.99, 9.99, 15.99, 15.99, 29.99, 49.99)",P1,Yes
+TC08,Sorting,Positive,Sort by price high to low,"1. Launch ""https://www.saucedemo.com/""
+2. Login with valid user credentilal","1. Select ""Price (high to low)""
+2. Read all 6 prices from top to bottom","Sort option ""Price (high to low)""",Every price is greater than or equal to the one after it (currently 49.99 down to 7.99),P1,Yes
+TC09,Product List,Negative,Try to login without creds by just going back and proceed forward,"1. Launch ""https://www.saucedemo.com/""
+2. Login with valid user credentilal","
+1. From  product list page, tap on the browser back button.
+2. Tap on the browser forward button",-,The user should not be allowed to login again when the user tries to go forward from login screen without providing valid username and password.,P2,Yes 
+TC10,Cart ,Positive,Add two items and remove one from the products page,"1. Launch ""https://www.saucedemo.com/""
+2. Login with valid user credentilal","1. Click ""Add to cart"" on Sauce Labs Backpack
+2. Click ""Add to cart"" on Sauce Labs Bike Light
+3. Check the cart badge
+4. Click ""Remove"" on Sauce Labs Backpack
+5. Check the cart badge
+6. Open the cart","Sauce Labs Backpack, Sauce Labs Bike Light","Step 3: badge shows ""2"" and both buttons show ""Remove"".
+Step 5: badge shows ""1"" and the Backpack button shows ""Add to cart"" again.
+Step 6: cart lists only Sauce Labs Bike Light, quantity 1, $9.99",P1,Yes
+TC11,Cart ,Positive,Remove an item from the cart page,"1. Launch ""https://www.saucedemo.com/""
+2. Login with valid user credentilal
+3. Sauce Labs Backpack and Sauce Labs Bike Light in cart","1. Open the cart
+2. Click ""Remove"" on Sauce Labs Backpack
+3. Click ""Continue Shopping","Sauce Labs Backpack, Sauce Labs Bike Light","Backpack should disappear from the cart; badge should show ""1""; on the products page the Backpack button should show ""Add to cart""",P2,Yes 
+TC12,Cart ,Boundary,Cart badge with zero items and with all items,"1. Launch ""https://www.saucedemo.com/""
+2. Login with valid user credential
+3. Empty cart","1. Check the cart badge
+2. Add all 6 products
+3. Check the cart badge
+4. Remove all 6 products
+5. Check the cart badge",All 6 products,"Steps 1 and 5: no badge should be shown (not ""0"").
+Step 3: badge should show ""6""",P2,Yes – boundary values for the badge count
+TC13,Cart,Positive,Cart is kept after logout and login as the same user,"1. Launch ""https://www.saucedemo.com/""
+2. Login with valid user credential
+3. Sauce Labs Backpack in cart","1. Open the menu and click ""Logout""
+2. Log in again as the same user
+3. Check the badge and the cart",standard_user / secret_sauce,"Backpack is still in the cart and the badge shows ""1"".
+Assumption: the cart is saved per user. To be confirmed with the PO",P3,No – behaviour not confirmed; automate once the PO confirms it
+TC14,Cart,Negative,Cart of one user is not shown to another user,"1. Launch ""https://www.saucedemo.com/""
+2. Login with valid user credential
+3. Sauce Labs Backpack in cart","1. Open the menu and click ""Logout""
+2. In the same browser, log in as problem_user
+3. Check the badge and the cart","First user: standard_user
+Second user: problem_user","problem_user's cart is empty and no badge is shown.
+Assumption: carts belong to the user, not the browser",P2,"No – explore manually first; if it is a defect, add it as an automated regression test"
+TC15,Checkout,Negative,Required-field errors on checkout information,"1. Launch ""https://www.saucedemo.com/""
+2. Login with valid user credential
+3. one item in cart
+4. On the ""Checkout: Your Information"" page","1. Fill the fields as per the data row
+2. Click ""Continue""","a) (empty) / User / 560001
+b) Test / (empty) / 560001
+c) Test / User / (empty)
+d) all fields empty","a) ""Error: First Name is required""
+b) ""Error: Last Name is required""
+c) ""Error: Postal Code is required""
+d) ""Error: First Name is required""
+User stays on the information page for every row",P1,Yes – one parameterized test; required in A2
+TC16,Checkout,Boundary,Unusual values in the checkout fields,"1. Launch ""https://www.saucedemo.com/""
+2. Login with valid user credential
+3. one item in cart
+4. On the ""Checkout: Your Information"" page","1. Enter the values as per the data row
+2. Click ""Continue""","a) spaces only in all fields
+b) 255-character first and last name
+c) O'Brien-Ä as the last name
+d) ABCDE as the postal code","a) An error is shown; spaces are not accepted as a name.
+b) Accepted without breaking the layout, or rejected with a clear message.
+c) Accepted.
+d) As per the PO's answer on postal code format.
+Assumption: no postal code format check; spaces-only input should be rejected",P3,No – depends on PO answers about validation rules
+TC17,Checkout,Positive,Full checkout: totals are correct and cart is empty after Finish,"1. Launch ""https://www.saucedemo.com/""
+2. Login with valid user credential
+3. Empty cart","1. Add Sauce Labs Backpack and Sauce Labs Bike Light
+2. Open the cart and click ""Checkout""
+3. Enter first name, last name, postal code and click ""Continue""
+4. Check the ""Checkout: Overview"" page
+5. Click ""Finish""
+6. Check the page, the badge and the cart","Test / User / 560001
+Backpack $29.99, Bike Light $9.99","Step 4: both items are listed; Item total equals the sum of item prices ($39.98); Total equals Item total + Tax (tax currently 8%: $3.20, total $43.18).
+Step 6: ""Thank you for your order!"" is shown with a ""Back Home"" button; no badge is shown; the cart is empty",P1,Yes – revenue-critical path; required in A2
+TC18,Checkout,Negative,Cancel on the overview page does not place the order,"1. Launch ""https://www.saucedemo.com/""
+2. Login with valid user credential
+3. Sauce Labs Backpack in cart
+4. On the ""Checkout: Overview"" page","1. Click ""Cancel""
+2. Check the page, the badge and the cart",–,"User returns to the products page; no order confirmation is shown; badge shows ""1""; Backpack is still in the cart",P2,Yes – business rule for Cancel
+TC19,Checkout,Negative,Checkout with an empty cart is blocked,"1. Launch ""https://www.saucedemo.com/""
+2. Login with valid user credential
+3. Empty cart","1. Open the cart
+2. Click ""Checkout""
+3. Enter valid details and click ""Continue""
+4. Click ""Finish""",John / Doe / 560001,"The ""Checkout"" button is disabled or an error is shown; no order is placed.
+Assumption: an order with no items is not allowed. If checkout goes through, report it as a defect",P2,Yes – regression check once the rule is confirmed
+TC20,Security,Negative,Products page cannot be opened by URL after logout,"1. Launch ""https://www.saucedemo.com/""
+2. Login with valid user credentilal","1. Open the menu and click ""Logout""
+2. Type base URL + /inventory.html in the address bar",/inventory.html,"Login page is shown with the error ""Epic sadface: You can only access '/inventory.html' when you are logged in.""",P1,Yes – access-control rule; required in A2
+TC21,Security,Negative,Browser Back after logout does not reopen inner pages,"1. Launch ""https://www.saucedemo.com/""
+2. Login with valid user credentilal""
+3. On the products page","1. Open the menu and click ""Logout""
+2. Click the browser Back button
+3. If a products page appears, click ""Add to cart"" on any item",–,Login page is shown (or the user is redirected to it); no inner page can be used without logging in again,P2,Yes – same rule as TC19 through a different path
+TC22,Security,Negative,Inner pages cannot be opened by URL without logging in,New browser session; never logged in,1. Open base URL + each path in the data column,"/cart.html
+/checkout-step-one.html
+/checkout-step-two.html
+/checkout-complete.html","Each path redirects to the login page with the error ""You can only access '<path>' when you are logged in.""",P2,Yes – one parameterized test over all inner pages
+TC23,Login,Usability,Error messages are clear and can be dismissed,On the login page,"1. Click ""Login"" with both fields empty
+2. Read the error and check the fields
+3. Click the X on the error message",–,The error states the problem in plain words; the fields are highlighted; clicking X closes the error and removes the highlight,P3,No – clarity of wording needs human judgement
+TC24,Cross-browser,Browser / screen size,Shop and check out on other browsers and screen sizes,"1. Launch ""https://www.saucedemo.com/""
+2. Login with valid user credentilal","1. Run the login-to-Finish flow on Chrome, Firefox and Edge
+2. Repeat at 375×667 (mobile) and 768×1024 (tablet)","Chrome, Firefox, Edge; 375×667, 768×1024","Layout is readable with no overlapping elements or horizontal scrolling; menu, sort, cart and checkout buttons are usable at every size",P2,No – manual for now; later add as a cross-browser CI run
+TC25,Accessibility,Accessibility,Complete the purchase using only the keyboard,On the login page,"1. Using only Tab, Shift+Tab, Enter and Space, log in, sort, add an item and check out
+2. Check that keyboard focus is always visible
+3. Check images and fields with a screen reader or an axe scan",Keyboard only; axe DevTools,Every action can be done by keyboard; focus is always visible; product images have meaningful alt text; every input has an accessible name,P2,No – manual with an axe scan as support; the keyboard flow could be automated later
+TC26,Menu,Positive,Reset App State clears the cart,"1. Launch """"https://www.saucedemo.com/""
+2. Login with valid user credentilal""
+3. Two items in cart","1. Open the menu and click ""Reset App State""
+2. Check the badge and the cart",–,No badge is shown and the cart is empty,P3,Yes – cheap check of the cart reset
