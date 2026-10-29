@@ -142,7 +142,7 @@ public class HtmlReportListener implements IReporter {
             <head>
             <meta charset="utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1">
-            <title>{{suite}} – Test Report</title>
+            <title>{{suite}}</title>
             <style>
               :root { --bg:#f6f7f9; --card:#fff; --text:#1d2330; --muted:#6b7280; --line:#e5e7eb;
                       --pass:#15803d; --pass-bg:#dcfce7; --fail:#b91c1c; --fail-bg:#fee2e2; --skip:#a16207; --skip-bg:#fef3c7; }
