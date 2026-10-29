@@ -2,40 +2,31 @@ package pages;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 
-/** Checkout: Complete! screen: /checkout-complete.html */
 public class CheckoutCompletePage extends BasePage {
 
-    public static final String PATH = "checkout-complete.html";
-
-    public static final By COMPLETE_CONTAINER   = By.cssSelector("[data-test='checkout-complete-container']");
-    public static final By PONY_EXPRESS_IMAGE   = By.cssSelector("[data-test='pony-express']");
-    public static final By COMPLETE_HEADER      = By.cssSelector("[data-test='complete-header']");
-    public static final By COMPLETE_TEXT        = By.cssSelector("[data-test='complete-text']");
-    public static final By BACK_HOME_BUTTON     = By.id("back-to-products");
-    public static final By GENERATE_PDF_BUTTON  = By.id("generate-pdf-order");
+    private static final By COMPLETE_HEADER     = By.cssSelector("[data-test='complete-header']");
+    private static final By COMPLETE_TEXT       = By.cssSelector("[data-test='complete-text']");
+    private static final By PONY_EXPRESS_IMAGE  = By.cssSelector("[data-test='pony-express']");
+    private static final By BACK_HOME_BUTTON    = By.id("back-to-products");
 
     public CheckoutCompletePage(WebDriver driver) {
         super(driver);
     }
 
-    public CheckoutCompletePage waitUntilLoaded() {
-        wait.until(ExpectedConditions.urlContains(PATH));
-        waitVisible(COMPLETE_HEADER);
-        return this;
+    public boolean isCheckoutCompletePageDisplayed() {
+        return isVisible(COMPLETE_HEADER) && driver.getCurrentUrl().contains("checkout-complete.html");
     }
 
-    public String getConfirmationHeader() {
-        return text(COMPLETE_HEADER);
+    public String getConfirmationMessage() {
+        return getText(COMPLETE_HEADER);
     }
 
     public boolean isBackHomeButtonDisplayed() {
-        return waitVisible(BACK_HOME_BUTTON).isDisplayed();
+        return isVisible(BACK_HOME_BUTTON);
     }
 
-    public ProductsPage backHome() {
+    public void clickBackHome() {
         click(BACK_HOME_BUTTON);
-        return new ProductsPage(driver).waitUntilLoaded();
     }
 }

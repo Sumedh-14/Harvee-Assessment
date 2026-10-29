@@ -1,30 +1,34 @@
 package tests;
 
 import base.BaseClass;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 import pages.LoginPage;
 import pages.ProductsPage;
 import utils.ConfigReader;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-
 public class LoginTest extends BaseClass {
 
     @Test(description = "TC01 Standard user logs in")
     public void TC01_standardUserLogsIn() {
-        ProductsPage products = loginAsStandardUser();
+        LoginPage loginPage = new LoginPage(driver);
+        loginPage.enterUserName(ConfigReader.get("standardUser"));
+        loginPage.enterPassword(ConfigReader.get("password"));
+        loginPage.clickLogin();
 
-        assertTrue(getDriver().getCurrentUrl().endsWith(ProductsPage.PATH), "URL after login");
-        assertEquals(products.getPageTitle(), "Products");
+        ProductsPage productsPage = new ProductsPage(driver);
+        Assert.assertTrue(productsPage.isProductsPageDisplayed(), "Products page should be displayed");
+        Assert.assertEquals(productsPage.getPageTitle(), "Products");
     }
 
     @Test(description = "TC02 Locked-out user cannot log in")
     public void TC02_lockedOutUserCannotLogIn() {
-        LoginPage login = openLoginPage()
-                .loginExpectingError(ConfigReader.get("lockedOutUser"), ConfigReader.get("password"));
+        LoginPage loginPage = new LoginPage(driver);
+        loginPage.enterUserName(ConfigReader.get("lockedOutUser"));
+        loginPage.enterPassword(ConfigReader.get("password"));
+        loginPage.clickLogin();
 
-        assertEquals(login.getErrorMessage(), "Epic sadface: Sorry, this user has been locked out.");
-        assertTrue(login.isDisplayed(), "User should stay on the login page");
+        Assert.assertEquals(loginPage.getErrorMessage(), "Epic sadface: Sorry, this user has been locked out.");
+        Assert.assertTrue(loginPage.isLoginPageDisplayed(), "User should stay on the login page");
     }
 }

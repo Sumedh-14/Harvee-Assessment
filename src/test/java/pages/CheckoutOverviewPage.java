@@ -2,74 +2,66 @@ package pages;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 
-import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 public class CheckoutOverviewPage extends BasePage {
 
-    public static final String PATH = "checkout-step-two.html";
-
-    public static final By SUMMARY_CONTAINER    = By.cssSelector("[data-test='checkout-summary-container']");
-    public static final By CART_LIST            = By.cssSelector("[data-test='cart-list']");
-    public static final By QTY_LABEL            = By.cssSelector("[data-test='cart-quantity-label']");
-    public static final By DESCRIPTION_LABEL    = By.cssSelector("[data-test='cart-desc-label']");
-    public static final By ORDER_ITEMS          = By.cssSelector("[data-test='inventory-item']");
-    public static final By ITEM_QUANTITIES      = By.cssSelector("[data-test='item-quantity']");
-    public static final By ITEM_NAMES           = By.cssSelector("[data-test='inventory-item-name']");
-    public static final By ITEM_DESCRIPTIONS    = By.cssSelector("[data-test='inventory-item-desc']");
-    public static final By ITEM_PRICES          = By.cssSelector("[data-test='inventory-item-price']");
-    public static final By PAYMENT_INFO_LABEL   = By.cssSelector("[data-test='payment-info-label']");
-    public static final By PAYMENT_INFO_VALUE   = By.cssSelector("[data-test='payment-info-value']");
-    public static final By SHIPPING_INFO_LABEL  = By.cssSelector("[data-test='shipping-info-label']");
-    public static final By SHIPPING_INFO_VALUE  = By.cssSelector("[data-test='shipping-info-value']");
-    public static final By PRICE_TOTAL_LABEL    = By.cssSelector("[data-test='total-info-label']");
-    public static final By ITEM_TOTAL           = By.cssSelector("[data-test='subtotal-label']");
-    public static final By TAX                  = By.cssSelector("[data-test='tax-label']");
-    public static final By TOTAL                = By.cssSelector("[data-test='total-label']");
-    public static final By CANCEL_BUTTON        = By.id("cancel");
-    public static final By FINISH_BUTTON        = By.id("finish");
+    private static final By SUMMARY_CONTAINER    = By.cssSelector("[data-test='checkout-summary-container']");
+    private static final By ITEM_QUANTITIES      = By.cssSelector("[data-test='item-quantity']");
+    private static final By ITEM_NAMES           = By.cssSelector("[data-test='inventory-item-name']");
+    private static final By ITEM_PRICES          = By.cssSelector("[data-test='inventory-item-price']");
+    private static final By PAYMENT_INFO_VALUE   = By.cssSelector("[data-test='payment-info-value']");
+    private static final By SHIPPING_INFO_VALUE  = By.cssSelector("[data-test='shipping-info-value']");
+    private static final By ITEM_TOTAL           = By.cssSelector("[data-test='subtotal-label']");
+    private static final By TAX                  = By.cssSelector("[data-test='tax-label']");
+    private static final By TOTAL                = By.cssSelector("[data-test='total-label']");
+    private static final By CANCEL_BUTTON        = By.id("cancel");
+    private static final By FINISH_BUTTON        = By.id("finish");
 
     public CheckoutOverviewPage(WebDriver driver) {
         super(driver);
     }
 
-    public static By orderItem(String productName) {
-        return By.xpath("//div[@data-test='inventory-item'][.//div[@data-test='inventory-item-name' and normalize-space()='"
-                + productName + "']]");
-    }
-
-    // ---------- Actions ----------
-
-    public CheckoutOverviewPage waitUntilLoaded() {
-        wait.until(ExpectedConditions.urlContains(PATH));
-        waitVisible(SUMMARY_CONTAINER);
-        return this;
+    public boolean isCheckoutOverviewPageDisplayed() {
+        return isVisible(SUMMARY_CONTAINER) && driver.getCurrentUrl().contains("checkout-step-two.html");
     }
 
     public List<String> getItemNames() {
-        return texts(ITEM_NAMES);
+        waitForVisible(SUMMARY_CONTAINER);
+        return getTexts(ITEM_NAMES);
     }
 
-    public List<BigDecimal> getItemPrices() {
-        return texts(ITEM_PRICES).stream().map(BasePage::money).toList();
+    public List<Double> getItemPrices() {
+        waitForVisible(SUMMARY_CONTAINER);
+        List<Double> prices = new ArrayList<>();
+        for (String price : getTexts(ITEM_PRICES)) {
+            prices.add(toPrice(price));
+        }
+        return prices;
     }
 
-    public BigDecimal getItemTotal() {
-        return money(text(ITEM_TOTAL));
+    /** "Item total: $39.98" -> 39.98 */
+    public double getItemTotal() {
+        return toPrice(getText(ITEM_TOTAL));
     }
 
-    public BigDecimal getTax() {
-        return money(text(TAX));
+    /** "Tax: $3.20" -> 3.20 */
+    public double getTax() {
+        return toPrice(getText(TAX));
     }
 
-    public BigDecimal getTotal() {
-        return money(text(TOTAL));
+    /** "Total: $43.18" -> 43.18 */
+    public double getTotal() {
+        return toPrice(getText(TOTAL));
     }
 
-    public CheckoutCompletePage finish() {
+    public void clickFinish() {
         click(FINISH_BUTTON);
-        return new CheckoutCompletePage(driver).waitUntilLoaded();
+    }
+
+    public void clickCancel() {
+        click(CANCEL_BUTTON);
     }
 }

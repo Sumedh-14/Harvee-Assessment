@@ -25,13 +25,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Writes target/saucedemo-report.html: one self-contained file (inline CSS, failure screenshots
+ * Writes target/report/index.html: one self-contained file (inline CSS, failure screenshots
  * embedded as base64) that renders the same in any browser or IDE preview.
  */
 public class HtmlReportListener implements IReporter {
 
     public static final String SCREENSHOT_ATTRIBUTE = "screenshot";
-    private static final Path REPORT = Paths.get("target", "saucedemo-report.html");
+    private static final Path REPORT = Paths.get("target", "report", "index.html");
 
     @Override
     public void generateReport(List<XmlSuite> xmlSuites, List<ISuite> suites, String outputDirectory) {

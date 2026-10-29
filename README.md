@@ -40,7 +40,7 @@ Lookup order is `-Dkey=value` system property, then environment variable, then t
 ## Running
 
 ```bash
-mvn test                                   # full suite (testng.xml), visible Chrome, 4 tests in parallel
+mvn test                                   # full suite (testng.xml), visible Chrome, 4 test classes in parallel
 mvn test -Dheadless=true                   # headless, e.g. on CI
 mvn test -Dbrowser=firefox                 # another browser
 mvn test -Dtest='CheckoutTest#TC17*'       # a single test on its own
@@ -48,19 +48,19 @@ mvn test -Dtest='CheckoutTest#TC17*'       # a single test on its own
 
 ### Reports and screenshots
 
-| Output                                          | What it is                                  |
-|-------------------------------------------------|---------------------------------------------|
-| **`target/saucedemo-report.html`**              | **Main report**: one self-contained HTML file (summary, per-test status, errors, failure screenshots embedded); opens the same in any browser or IDE preview |
-| `target/surefire-reports/emailable-report.html` | TestNG's built-in one-page summary          |
-| `target/surefire-reports/index.html`            | Full TestNG HTML report, incl. failure logs |
-| `target/surefire-reports/TEST-TestSuite.xml`    | JUnit XML for CI tools                      |
-| `target/screenshots/*.png`                      | Screenshot of the browser for every failure; linked from the HTML report |
+| Output                                       | What it is |
+|----------------------------------------------|------------|
+| **`target/report/index.html`**               | **The report.** One self-contained HTML file: summary, per-test status by A1 ID, data rows, errors, and failure screenshots embedded. Open it with `open target/report/index.html`. |
+| `target/surefire-reports/TEST-TestSuite.xml` | JUnit XML for CI tools |
+| `target/screenshots/*.png`                   | Screenshot of the browser for every failure (also embedded in the report) |
+
+TestNG's built-in HTML reports are switched off in `pom.xml` (`usedefaultlisteners=false`). They depend on a retired Google script and render badly.
 
 ## Project structure
 
 ```
 src/test/java/
-├── base/BaseClass.java        fresh browser per test, screenshot on failure, shared login precondition
+├── base/BaseClass.java        driver: opens a fresh browser before each test, screenshot on failure, quits after
 ├── pages/                     page objects: locators + actions with explicit waits
 │   ├── BasePage.java          header, burger menu, footer, wait helpers
 │   ├── LoginPage.java
@@ -82,9 +82,9 @@ testng.xml
 
 Design rules the suite follows:
 
-- **No locators in tests.** Tests call page methods only (`loginAs`, `sortBy`, `addToCart`, ...).
+- **No locators in tests.** Locators are `private` in the page classes. Tests create page objects (`new LoginPage(driver)`) and call step methods such as `enterUserName(...)`, `clickLogin()`, `clickAddToCart(...)`.
 - **No fixed sleeps.** Every interaction goes through `WebDriverWait` (visibility, URL, invisibility, retrying clicks).
-- **Independent tests.** Each test opens its own browser and logs in itself, so tests run alone, in any order, and in parallel.
+- **Independent tests.** Each test opens its own browser and logs in itself, so tests run alone and in any order. `testng.xml` runs test classes in parallel (`parallel="classes"`); tests inside one class run one after another, because they share that class's `driver` field.
 
 ## Manual to automated traceability
 
@@ -122,4 +122,4 @@ Cases marked "Yes" in A1 that are not automated yet are listed as *manual only (
 
 ## Growing to 200 tests
 
-At 200 tests the structure stays the same, but a few things get promoted. Page objects split into reusable components (header, menu, product card, cart row), so a UI change is fixed in one place. Test data moves out of the test bodies into data providers backed by JSON/CSV files, and preconditions such as "logged in with two items in the cart" become builder-style helpers. Where the app allows it, they are set up through cookies or the API rather than the UI. Tests are tagged with TestNG groups (`smoke`, `regression`, per feature), so CI runs a fast smoke set on every pull request and the full regression nightly. Execution scales out through parallel runs on a Selenium Grid or a cloud provider, using the `ThreadLocal` driver already in place, with `DriverFactory` choosing a remote driver from config. Reporting moves to Allure or ExtentReports, with screenshots, browser logs and a retry analyzer that flags flaky tests instead of hiding them. Finally, a lint rule or code review rule keeps `By` locators and `Thread.sleep` out of the `tests` package.
+At 200 tests the structure stays the same, but a few things get promoted. Page objects split into reusable components (header, menu, product card, cart row), so a UI change is fixed in one place. Test data moves out of the test bodies into data providers backed by JSON/CSV files, and preconditions such as "logged in with two items in the cart" become builder-style helpers. Where the app allows it, they are set up through cookies or the API rather than the UI. Tests are tagged with TestNG groups (`smoke`, `regression`, per feature), so CI runs a fast smoke set on every pull request and the full regression nightly. Execution scales out through parallel runs on a Selenium Grid or a cloud provider, with the driver moved into a `ThreadLocal` so tests inside one class can also run in parallel, and with `DriverFactory` choosing a remote driver from config. Reporting moves to Allure or ExtentReports, with screenshots, browser logs and a retry analyzer that flags flaky tests instead of hiding them. Finally, a lint rule or code review rule keeps `By` locators and `Thread.sleep` out of the `tests` package.

@@ -1,34 +1,49 @@
 package tests;
 
 import base.BaseClass;
+import org.testng.Assert;
 import org.testng.annotations.Test;
+import pages.LoginPage;
 import pages.ProductsPage;
+import utils.ConfigReader;
 
-import java.math.BigDecimal;
-import java.util.Comparator;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-
-import static org.testng.Assert.assertEquals;
 
 public class SortingTest extends BaseClass {
 
     @Test(description = "TC07 Sort by price low to high")
     public void TC07_sortByPriceLowToHigh() {
-        ProductsPage products = loginAsStandardUser().sortBy(ProductsPage.SORT_PRICE_LOW_HIGH);
+        LoginPage loginPage = new LoginPage(driver);
+        loginPage.login(ConfigReader.get("standardUser"), ConfigReader.get("password"));
 
-        List<BigDecimal> prices = products.getProductPrices();
-        assertEquals(prices.size(), 6, "Number of products");
-        assertEquals(prices, prices.stream().sorted().toList(), "Each price should be <= the one after it");
-        assertEquals(products.getActiveSortOption(), "Price (low to high)");
+        ProductsPage productsPage = new ProductsPage(driver);
+        productsPage.selectSortOption("Price (low to high)");
+
+        List<Double> actualPrices = productsPage.getAllProductPrices();
+        List<Double> expectedPrices = new ArrayList<>(actualPrices);
+        Collections.sort(expectedPrices);
+
+        Assert.assertEquals(actualPrices.size(), 6, "Number of products");
+        Assert.assertEquals(actualPrices, expectedPrices, "Every price should be <= the one after it");
+        Assert.assertEquals(productsPage.getSelectedSortOption(), "Price (low to high)");
     }
 
     @Test(description = "TC08 Sort by price high to low")
     public void TC08_sortByPriceHighToLow() {
-        ProductsPage products = loginAsStandardUser().sortBy(ProductsPage.SORT_PRICE_HIGH_LOW);
+        LoginPage loginPage = new LoginPage(driver);
+        loginPage.login(ConfigReader.get("standardUser"), ConfigReader.get("password"));
 
-        List<BigDecimal> prices = products.getProductPrices();
-        assertEquals(prices.size(), 6, "Number of products");
-        assertEquals(prices, prices.stream().sorted(Comparator.reverseOrder()).toList(), "Each price should be >= the one after it");
-        assertEquals(products.getActiveSortOption(), "Price (high to low)");
+        ProductsPage productsPage = new ProductsPage(driver);
+        productsPage.selectSortOption("Price (high to low)");
+
+        List<Double> actualPrices = productsPage.getAllProductPrices();
+        List<Double> expectedPrices = new ArrayList<>(actualPrices);
+        expectedPrices.sort(Collections.reverseOrder());
+
+        Assert.assertEquals(actualPrices.size(), 6, "Number of products");
+        Assert.assertEquals(actualPrices, expectedPrices, "Every price should be >= the one after it");
+        Assert.assertEquals(productsPage.getSelectedSortOption(), "Price (high to low)");
     }
 }

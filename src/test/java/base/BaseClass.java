@@ -1,58 +1,51 @@
 package base;
 
+import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
-import pages.LoginPage;
-import pages.ProductsPage;
 import utils.ConfigReader;
 import utils.DriverFactory;
 import utils.HtmlReportListener;
 import utils.ScreenshotUtil;
 
 import java.nio.file.Path;
-import java.util.Arrays;
+import java.time.Duration;
 
-/**
- * Every test gets its own browser, so tests run independently, in any order and in parallel.
- */
 public class BaseClass {
 
-    private static final ThreadLocal<WebDriver> DRIVER = new ThreadLocal<>();
-
-    protected WebDriver getDriver() {
-        return DRIVER.get();
-    }
+    protected WebDriver driver;
 
     @BeforeMethod(alwaysRun = true)
     public void setUp() {
-        DRIVER.set(DriverFactory.create());
+        driver = DriverFactory.create();
+        openApplication();
     }
 
     @AfterMethod(alwaysRun = true)
     public void tearDown(ITestResult result) {
-        WebDriver driver = DRIVER.get();
         if (driver == null) return;
-        try {
-            if (result.getStatus() == ITestResult.FAILURE) {
-                String params = result.getParameters().length == 0 ? "" : "_" + Arrays.toString(result.getParameters());
-                Path screenshot = ScreenshotUtil.capture(driver, result.getMethod().getMethodName() + params);
-                result.setAttribute(HtmlReportListener.SCREENSHOT_ATTRIBUTE, screenshot);
-            }
-        } finally {
-            driver.quit();
-            DRIVER.remove();
+        if (result.getStatus() == ITestResult.FAILURE) {
+            Path screenshot = ScreenshotUtil.capture(driver, result.getMethod().getMethodName());
+            result.setAttribute(HtmlReportListener.SCREENSHOT_ATTRIBUTE, screenshot);
         }
+        driver.quit();
     }
 
-    // ---------- Shared preconditions ----------
-
-    protected LoginPage openLoginPage() {
-        return new LoginPage(getDriver()).open();
-    }
-
-    protected ProductsPage loginAsStandardUser() {
-        return openLoginPage().loginAs(ConfigReader.get("standardUser"), ConfigReader.get("password"));
+    // Reloads once if the site comes up blank on the first load.
+    private void openApplication() {
+        driver.get(ConfigReader.get("baseUrl"));
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(ConfigReader.getInt("timeoutSeconds")));
+        By loginButton = By.id("login-button");
+        try {
+            wait.until(ExpectedConditions.visibilityOfElementLocated(loginButton));
+        } catch (TimeoutException e) {
+            driver.navigate().refresh();
+            wait.until(ExpectedConditions.visibilityOfElementLocated(loginButton));
+        }
     }
 }

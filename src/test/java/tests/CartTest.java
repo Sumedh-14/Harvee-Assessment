@@ -1,14 +1,14 @@
 package tests;
 
 import base.BaseClass;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 import pages.CartPage;
+import pages.LoginPage;
 import pages.ProductsPage;
+import utils.ConfigReader;
 
-import java.math.BigDecimal;
 import java.util.List;
-
-import static org.testng.Assert.assertEquals;
 
 public class CartTest extends BaseClass {
 
@@ -17,24 +17,31 @@ public class CartTest extends BaseClass {
 
     @Test(description = "TC10 Add two items and remove one from the products page")
     public void TC10_addTwoItemsAndRemoveOneFromProductsPage() {
-        ProductsPage products = loginAsStandardUser()
-                .addToCart(BACKPACK)
-                .addToCart(BIKE_LIGHT);
+        LoginPage loginPage = new LoginPage(driver);
+        loginPage.login(ConfigReader.get("standardUser"), ConfigReader.get("password"));
 
-        // Step 3
-        assertEquals(products.getCartBadgeCount(), 2, "Badge after adding two items");
-        assertEquals(products.getCartButtonText(BACKPACK), "Remove");
-        assertEquals(products.getCartButtonText(BIKE_LIGHT), "Remove");
+        // Steps 1-3: add two items, check badge and buttons
+        ProductsPage productsPage = new ProductsPage(driver);
+        productsPage.clickAddToCart(BACKPACK);
+        productsPage.clickAddToCart(BIKE_LIGHT);
 
-        // Steps 4-5
-        products.removeFromCart(BACKPACK);
-        assertEquals(products.getCartBadgeCount(), 1, "Badge after removing the Backpack");
-        assertEquals(products.getCartButtonText(BACKPACK), "Add to cart");
+        Assert.assertEquals(productsPage.getCartBadgeCount(), 2, "Badge after adding two items");
+        Assert.assertEquals(productsPage.getButtonText(BACKPACK), "Remove");
+        Assert.assertEquals(productsPage.getButtonText(BIKE_LIGHT), "Remove");
 
-        // Step 6
-        CartPage cart = products.openCart();
-        assertEquals(cart.getItemNames(), List.of(BIKE_LIGHT), "Cart contents");
-        assertEquals(cart.getItemQuantities(), List.of(1), "Quantity");
-        assertEquals(cart.getItemPrices(), List.of(new BigDecimal("9.99")), "Price");
+        // Steps 4-5: remove the Backpack, check badge and button
+        productsPage.clickRemove(BACKPACK);
+
+        Assert.assertEquals(productsPage.getCartBadgeCount(), 1, "Badge after removing the Backpack");
+        Assert.assertEquals(productsPage.getButtonText(BACKPACK), "Add to cart");
+
+        // Step 6: open the cart
+        productsPage.clickCartIcon();
+
+        CartPage cartPage = new CartPage(driver);
+        Assert.assertTrue(cartPage.isCartPageDisplayed(), "Cart page should be displayed");
+        Assert.assertEquals(cartPage.getCartItemNames(), List.of(BIKE_LIGHT), "Cart contents");
+        Assert.assertEquals(cartPage.getCartItemQuantities(), List.of(1), "Quantity");
+        Assert.assertEquals(cartPage.getCartItemPrices(), List.of(9.99), "Price");
     }
 }

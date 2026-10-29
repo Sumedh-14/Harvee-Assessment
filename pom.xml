@@ -51,6 +51,12 @@
                             <name>listener</name>
                             <value>utils.HtmlReportListener</value>
                         </property>
+                        <!-- TestNG's own HTML reports are replaced by target/report/index.html;
+                             Surefire still writes the JUnit XML (target/surefire-reports/TEST-*.xml) -->
+                        <property>
+                            <name>usedefaultlisteners</name>
+                            <value>false</value>
+                        </property>
                     </properties>
                 </configuration>
             </plugin>
